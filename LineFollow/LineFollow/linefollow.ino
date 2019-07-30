@@ -1,8 +1,8 @@
 int pos;
 // int flag = 150;
 // int adcal[5] = {28, 28, 27, 27, 30};
-int adcal[5] = {340, 337, 350, 335, 383};
-int a[5]; // analog value for each sensor
+const int adcal[3] = {30, 27, 29};
+int a[3]; // analog value for each sensor
 
 //float lr_ratio = 1.2;
 void doDcSpeed(int spdL, int spdR)
@@ -261,6 +261,9 @@ void parseCmd(char *cmd)
 void setup()
 {
 	Serial.begin(9600);
+	pinMode(A0, INPUT);
+	pinMode(A1, INPUT);
+	pinMode(A2, INPUT);
 	echoVersion();
 }
 
