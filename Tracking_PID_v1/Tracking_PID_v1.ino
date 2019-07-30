@@ -1,11 +1,11 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-float Kp = 5, Ki = 0, Kd = 0;
+float Kp = 10, Ki = 2, Kd = 0;
 float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
 float previous_error = 0, previous_I = 0;
 int sensor[3] = {0, 0, 0};
-int initial_motor_speed = 35;
+int initial_motor_speed = 50;
 
 const int key = 7; //按键key
 
@@ -39,33 +39,9 @@ void loop()
 
 void read_sensor_values()
 {
-	sensor[0] = digitalRead(A2);
+	sensor[0] = digitalRead(A0);
 	sensor[1] = digitalRead(A1);
-	sensor[2] = digitalRead(A1);
-
-	// if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[4] == 0) && (sensor[4] == 1))
-	// 	error = 4;
-	// else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[4] == 1) && (sensor[4] == 1))
-	// 	error = 3;
-	// else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[4] == 1) && (sensor[4] == 0))
-	// 	error = 2;
-	// else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1) && (sensor[4] == 1) && (sensor[4] == 0))
-	// 	error = 1;
-	// else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1) && (sensor[4] == 0) && (sensor[4] == 0))
-	// 	error = 0;
-	// else if ((sensor[0] == 0) && (sensor[1] == 1) && (sensor[2] == 1) && (sensor[4] == 0) && (sensor[4] == 0))
-	// 	error = -1;
-	// else if ((sensor[0] == 0) && (sensor[1] == 1) && (sensor[2] == 0) && (sensor[4] == 0) && (sensor[4] == 0))
-	// 	error = -2;
-	// else if ((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 0) && (sensor[4] == 0) && (sensor[4] == 0))
-	// 	error = -3;
-	// else if ((sensor[0] == 1) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[4] == 0) && (sensor[4] == 0))
-	// 	error = -4;
-	// else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[4] == 0) && (sensor[4] == 0))
-	// 	if (error == -4)
-	// 		error = -5;
-	// 	else
-	// 		error = 5;
+	sensor[2] = digitalRead(A2);
 
 	if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1))
 	{
@@ -124,7 +100,7 @@ void motor_control()
 
 	// analogWrite(9, initial_motor_speed - PID_value);  //Left Motor Speed
 	// analogWrite(10, initial_motor_speed + PID_value); //Right Motor Speed
-	run(left_motor_speed, right_motor_speed);
+	run(initial_motor_speed - PID_value, initial_motor_speed + PID_value);
 
 	//following lines of code are to make the bot move forward
 	/*The pin numbers and high, low values might be different

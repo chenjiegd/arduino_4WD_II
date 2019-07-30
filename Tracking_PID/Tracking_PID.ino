@@ -12,11 +12,12 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-const int adcal[3] = {30, 27, 29};
+const int adcal[3] = {35, 35, 35};
 int sensor[3];
 
 /*小车初始速度控制*/
-int CarSpeedControl = 150;
+int CarSpeedControl = 50;
+const int key = 7; //按键key
 
 void setup()
 {
@@ -29,6 +30,8 @@ void setup()
 	pinMode(A0, INPUT);
 	pinMode(A1, INPUT);
 	pinMode(A2, INPUT);
+	pinMode(key, INPUT); //定义按键输入脚
+	keysacn();
 }
 
 int pos;
@@ -40,7 +43,7 @@ void loop()
 }
 
 //PID算法部分
-float Kp = 120; // 25
+float Kp = 10; // 25
 float Ki = 0;   // 0.15
 float Kd = 0;   //1200
 float error, errorLast, erroInte;
@@ -70,11 +73,11 @@ int echoTrace()
 	sensor[1] = analogRead(A1);
 	sensor[2] = analogRead(A0);
 	int ret = 0;
-	int a[3];
+	// int a[3];
 	for (int i = 0; i < 3; i++)
 	{
-		a[i] = constrain((1025 - analogRead(A2 - i)) / 10 - 4, 0, 20);
-		if (a[i] > sensor[i])
+		// sensor[i] = constrain((1025 - analogRead(A2 - i)) / 10 - 4, 0, 20);
+		if (sensor[i] > adcal[i])
 			ret += (0x1 << i);
 	}
 	return ret;
@@ -87,33 +90,29 @@ void stateMachine(int a)
 {
 	switch (a)
 	{
-	case B00000:
+	case B000:
 		outlineCnt++;
 		break;
-	case B11111:
+	case B111:
 		outlineCnt++;
 		break;
-	case B00010:
-	case B00110:
-		outlineCnt = 0;
-		bias = 1;
-		break;
-	case B00001:
-	case B00011:
+	case B001:
 		outlineCnt = 0;
 		bias = 2;
 		break;
-	case B00100:
+	case B011:
+		outlineCnt = 0;
+		bias = 1;
+		break;
+	case B010:
 		outlineCnt = 0;
 		bias = 0;
 		break;
-	case B01000:
-	case B01100:
+	case B110:
 		outlineCnt = 0;
 		bias = -1;
 		break;
-	case B10000:
-	case B11000:
+	case B100:
 		outlineCnt = 0;
 		bias = -2;
 		break;
@@ -129,7 +128,7 @@ void stateMachine(int a)
 	}
 	else
 	{
-		float ff = 150;
+		float ff = 50;
 		float ctrl = calcPid(bias);
 		doDcSpeed(ff - ctrl, ff + ctrl);
 	}
@@ -137,27 +136,45 @@ void stateMachine(int a)
 
 void doDcSpeed(int spdL, int spdR)
 {
-	spdR = -spdR;
+	spdL = map(spdL, 0, 255, 0, 4095);
+	spdR = map(spdR, 0, 255, 0, 4095);
+	// spdR = -spdR;
 	if (spdL < 0)
 	{
-		analogWrite(5, 0);
-		analogWrite(6, -spdL);
+		// analogWrite(5, 0);
+		// analogWrite(6, -spdL);
+		pwm.setPWM(13, 0, spdL); //左前
+		pwm.setPWM(12, 0, 0);
+		pwm.setPWM(15, 0, spdL); //左后
+		pwm.setPWM(14, 0, 0);
 	}
 	else
 	{
-		analogWrite(5, spdL);
-		analogWrite(6, 0);
+		// analogWrite(5, spdL);
+		// analogWrite(6, 0);
+		pwm.setPWM(13, 0, spdL); //左前
+		pwm.setPWM(12, 0, 0);
+		pwm.setPWM(15, 0, spdL); //左后
+		pwm.setPWM(14, 0, 0);
 	}
 
 	if (spdR < 0)
 	{
-		analogWrite(9, 0);
-		analogWrite(10, -spdR);
+		// analogWrite(9, 0);
+		// analogWrite(10, -spdR);
+		pwm.setPWM(10, 0, spdR); //右前
+		pwm.setPWM(11, 0, 0);
+		pwm.setPWM(8, 0, spdR); //右后
+		pwm.setPWM(9, 0, 0);
 	}
 	else
 	{
-		analogWrite(9, spdR);
-		analogWrite(10, 0);
+		// analogWrite(9, spdR);
+		// analogWrite(10, 0);
+		pwm.setPWM(10, 0, spdR); //右前
+		pwm.setPWM(11, 0, 0);
+		pwm.setPWM(8, 0, spdR); //右后
+		pwm.setPWM(9, 0, 0);
 	}
 }
 
