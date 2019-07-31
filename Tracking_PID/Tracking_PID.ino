@@ -69,16 +69,24 @@ float calcPid(float input)
 
 int echoTrace()
 {
-	sensor[0] = analogRead(A2);
-	sensor[1] = analogRead(A1);
-	sensor[2] = analogRead(A0);
+	// sensor[0] = analogRead(A2);
+	// sensor[1] = analogRead(A1);
+	// sensor[2] = analogRead(A0);
+	// int ret = 0;
+	// // int a[3];
+	// for (int i = 0; i < 3; i++)
+	// {
+	// 	// sensor[i] = constrain((1025 - analogRead(A2 - i)) / 10 - 4, 0, 20);
+	// 	if (sensor[i] > adcal[i])
+	// 		ret += (0x1 << i);
+	// }
+	// return ret;
+
 	int ret = 0;
-	// int a[3];
-	for (int i = 0; i < 3; i++)
-	{
-		// sensor[i] = constrain((1025 - analogRead(A2 - i)) / 10 - 4, 0, 20);
-		if (sensor[i] > adcal[i])
-			ret += (0x1 << i);
+	int a[3];
+	for (int i = 0; i < 3; i++) {
+		a[i] = constrain((1025 - analogRead(A0 + i)) / 10 - 4, 0, 20);
+		if (a[i] > 2) ret += (0x1 << i);
 	}
 	return ret;
 }

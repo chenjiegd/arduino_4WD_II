@@ -1,7 +1,7 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-int initial_motor_speed = 50;
+int initial_motor_speed = 100;
 int sensor[3];
 
 const int key = 7; //按键key
@@ -76,7 +76,11 @@ void read_sensor_values()
   }
   else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0))
   {
-    
+    Clear_All_PWM();
+  }
+  else if ((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 1))
+  {
+    Clear_All_PWM();
   }
 }
 

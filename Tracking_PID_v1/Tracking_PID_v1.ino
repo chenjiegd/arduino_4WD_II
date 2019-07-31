@@ -1,11 +1,11 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-float Kp = 10, Ki = 2, Kd = 0;
+float Kp = 80, Ki = 0, Kd = 9000;//
 float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
 float previous_error = 0, previous_I = 0;
 int sensor[3] = {0, 0, 0};
-int initial_motor_speed = 50;
+int initial_motor_speed = 40;
 
 const int key = 7; //按键key
 
@@ -17,6 +17,7 @@ void Clear_All_PWM(void);
 
 void setup()
 {
+	Serial.begin(9600);
 	// put your setup code here, to run once:
 	//初始化电机驱动IO为输出方式
 	pwm.begin();
@@ -39,9 +40,36 @@ void loop()
 
 void read_sensor_values()
 {
-	sensor[0] = digitalRead(A0);
-	sensor[1] = digitalRead(A1);
-	sensor[2] = digitalRead(A2);
+	// sensor[0] = digitalRead(A2);
+	// sensor[1] = digitalRead(A1);
+	// sensor[2] = digitalRead(A0);
+	sensor[0] = analogRead(A0);
+	sensor[1] = analogRead(A1);
+	sensor[2] = analogRead(A2);
+	if (sensor[0] > 40)
+	{
+		sensor[0] = 1;
+	}
+	else
+	{
+		sensor[0] = 0;
+	}
+	if (sensor[1] > 40)
+	{
+		sensor[1] = 1;
+	}
+	else
+	{
+		sensor[1] = 0;
+	}
+	if (sensor[2] > 40)
+	{
+		sensor[2] = 1;
+	}
+	else
+	{
+		sensor[2] = 0;
+	}
 
 	if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1))
 	{
@@ -65,14 +93,7 @@ void read_sensor_values()
 	}
 	else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0))
 	{
-		if (error == -2)
-		{
-			error = -3;
-		}
-		else
-		{
-			error = 3;
-		}
+		Clear_All_PWM();
 	}
 }
 
@@ -83,6 +104,7 @@ void calculate_pid()
 	D = error - previous_error;
 
 	PID_value = (Kp * P) + (Ki * I) + (Kd * D);
+	// Serial.println(PID_value);
 
 	previous_I = I;
 	previous_error = error;
@@ -95,12 +117,13 @@ void motor_control()
 	int right_motor_speed = initial_motor_speed + PID_value;
 
 	// The motor speed should not exceed the max PWM value
-	left_motor_speed = constrain(left_motor_speed, 0, 255);
-	right_motor_speed = constrain(right_motor_speed, 0, 255);
+	left_motor_speed = constrain(left_motor_speed, -255, 255);
+	right_motor_speed = constrain(right_motor_speed, -255, 255);
 
 	// analogWrite(9, initial_motor_speed - PID_value);  //Left Motor Speed
 	// analogWrite(10, initial_motor_speed + PID_value); //Right Motor Speed
-	run(initial_motor_speed - PID_value, initial_motor_speed + PID_value);
+	// run(initial_motor_speed - PID_value, initial_motor_speed + PID_value);
+	run(left_motor_speed, right_motor_speed);
 
 	//following lines of code are to make the bot move forward
 	/*The pin numbers and high, low values might be different
@@ -123,17 +146,46 @@ void motor_control()
 */
 void run(float Speed1, float Speed2)
 {
-	Speed1 = map(Speed1, 0, 255, 0, 4095);
-	Speed2 = map(Speed2, 0, 255, 0, 4095);
-	pwm.setPWM(10, 0, Speed2); //右前
-	pwm.setPWM(11, 0, 0);
-	pwm.setPWM(8, 0, Speed2); //右后
-	pwm.setPWM(9, 0, 0);
+	Speed1 = map(Speed1, -255, 255, -4095, 4095);
+	Speed2 = map(Speed2, -255, 255, -4095, 4095);
+	if (Speed2 > 0)
+	{
+		pwm.setPWM(10, 0, Speed2); //右前
+		pwm.setPWM(11, 0, 0);
+		pwm.setPWM(8, 0, Speed2); //右后
+		pwm.setPWM(9, 0, 0);
+	}
+	else
+	{
+		pwm.setPWM(10, 0, 0); //右前
+		pwm.setPWM(11, 0, -Speed2);
+		pwm.setPWM(8, 0, 0); //右后
+		pwm.setPWM(9, 0, -Speed2);
+	}
+	if (Speed1 > 0)
+	{
+		pwm.setPWM(13, 0, Speed1); //左前
+		pwm.setPWM(12, 0, 0);
+		pwm.setPWM(15, 0, Speed1); //左后
+		pwm.setPWM(14, 0, 0);
+	}
+	else
+	{
+		pwm.setPWM(13, 0, 0); //左前
+		pwm.setPWM(12, 0, -Speed1);
+		pwm.setPWM(15, 0, 0); //左后
+		pwm.setPWM(14, 0, -Speed1);
+	}
 
-	pwm.setPWM(13, 0, Speed1); //左前
-	pwm.setPWM(12, 0, 0);
-	pwm.setPWM(15, 0, Speed1); //左后
-	pwm.setPWM(14, 0, 0);
+	// pwm.setPWM(10, 0, Speed2); //右前
+	// pwm.setPWM(11, 0, 0);
+	// pwm.setPWM(8, 0, Speed2); //右后
+	// pwm.setPWM(9, 0, 0);
+
+	// pwm.setPWM(13, 0, Speed1); //左前
+	// pwm.setPWM(12, 0, 0);
+	// pwm.setPWM(15, 0, Speed1); //左后
+	// pwm.setPWM(14, 0, 0);
 }
 
 /**
