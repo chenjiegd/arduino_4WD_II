@@ -1,8 +1,9 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-float max = 3.5;
-float Kp = 38, Ki = 4, Kd = 50;
+float max = 3.85;
+float s = 100;
+float Kp = 37, Ki = 4, Kd = 60;
 float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
 float previous_error = 0, previous_I = 0;
 int sensor[3] = {0, 0, 0};
@@ -68,7 +69,6 @@ void read_sensor_values()
 		sensor[2] = 0;
 	}
 
-	
 	if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1))
 	{
 		error = 2;
@@ -91,14 +91,30 @@ void read_sensor_values()
 	}
 	else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0))
 	{
-		if(error>0){
+		if (error > 0)
+		{
 			//左旋
 			error = max;
-		}else{
+		}
+		else
+		{
 			//右旋
 			error = -max;
 		}
 	}
+	// else if ((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 1))
+	// {
+	// 	if ((error > 0) && (previous_error > 0))
+	// 	{
+	// 		//左旋
+	// 		error = max;
+	// 	}
+	// 	else if ((error < 0) && (previous_error < 0))
+	// 	{
+	// 		//右旋
+	// 		error = -max;
+	// 	}
+	// }
 }
 
 void calculate_pid()
@@ -121,9 +137,12 @@ void motor_control()
 	int right_motor_speed = initial_motor_speed + PID_value;
 
 	// The motor speed should not exceed the max PWM value
-	left_motor_speed = constrain(left_motor_speed, -255, 255);
-	right_motor_speed = constrain(right_motor_speed, -255, 255);
-	
+	// left_motor_speed = constrain(left_motor_speed, -255, 255);
+	// right_motor_speed = constrain(right_motor_speed, -255, 255);
+
+	left_motor_speed = constrain(left_motor_speed, -s, s);
+	right_motor_speed = constrain(right_motor_speed, -s, s);
+
 	run(left_motor_speed, right_motor_speed);
 
 	// if((error>=-2)&&(error<=2)){
@@ -181,7 +200,19 @@ void run(float Speed1, float Speed2)
 		pwm.setPWM(14, 0, -Speed1);
 	}
 }
-void sleft(float Speed){
+
+/**
+* Function       sleft
+* @author        wusicaijuan
+* @date          2019.06.25
+* @brief         小车左旋
+* @param[in]     Speed
+* @param[out]    void
+* @retval        void
+* @par History   无
+*/
+void sleft(float Speed)
+{
 	pwm.setPWM(10, 0, Speed); //右前
 	pwm.setPWM(11, 0, 0);
 	pwm.setPWM(8, 0, Speed); //右后
@@ -192,7 +223,19 @@ void sleft(float Speed){
 	pwm.setPWM(15, 0, 0); //左后
 	pwm.setPWM(14, 0, Speed);
 }
-void sright(float Speed){
+
+/**
+* Function       sright
+* @author        wusicaijuan
+* @date          2019.06.25
+* @brief         小车右旋
+* @param[in]     Speed
+* @param[out]    void
+* @retval        void
+* @par History   无
+*/
+void sright(float Speed)
+{
 	pwm.setPWM(10, 0, 0); //右前
 	pwm.setPWM(11, 0, Speed);
 	pwm.setPWM(8, 0, 0); //右后
