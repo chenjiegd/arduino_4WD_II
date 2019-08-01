@@ -1,7 +1,7 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-float max = 4;
+float max = 3.5;
 float Kp = 38, Ki = 4, Kd = 50;
 float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
 float previous_error = 0, previous_I = 0;
@@ -123,18 +123,19 @@ void motor_control()
 	// The motor speed should not exceed the max PWM value
 	left_motor_speed = constrain(left_motor_speed, -255, 255);
 	right_motor_speed = constrain(right_motor_speed, -255, 255);
-	// run(left_motor_speed, right_motor_speed);
+	
+	run(left_motor_speed, right_motor_speed);
 
-	if((error>=-2)&&(error<=2)){
-		run(left_motor_speed, right_motor_speed);
-	}else if(error<-2){
-		error = 0;
-		sright(100);
-	}else
-	{
-		error = 0;
-		sleft(100);
-	}
+	// if((error>=-2)&&(error<=2)){
+	// 	run(left_motor_speed, right_motor_speed);
+	// }else if(error<-2){
+	// 	error = 0;
+	// 	sright(100);
+	// }else
+	// {
+	// 	error = 0;
+	// 	sleft(100);
+	// }
 }
 
 /**
