@@ -1,8 +1,8 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-float max = 3;
-float Kp = 38, Ki = 4, Kd = 50;//
+float max = 4;
+float Kp = 38, Ki = 4, Kd = 50;
 float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
 float previous_error = 0, previous_I = 0;
 int sensor[3] = {0, 0, 0};
@@ -18,7 +18,6 @@ void Clear_All_PWM(void);
 
 void setup()
 {
-	//Serial.begin(9600);
 	// put your setup code here, to run once:
 	//初始化电机驱动IO为输出方式
 	pwm.begin();
@@ -41,9 +40,6 @@ void loop()
 
 void read_sensor_values()
 {
-	// sensor[0] = digitalRead(A2);
-	// sensor[1] = digitalRead(A1);
-	// sensor[2] = digitalRead(A0);
 	sensor[0] = analogRead(A0);
 	sensor[1] = analogRead(A1);
 	sensor[2] = analogRead(A2);
@@ -127,19 +123,18 @@ void motor_control()
 	// The motor speed should not exceed the max PWM value
 	left_motor_speed = constrain(left_motor_speed, -255, 255);
 	right_motor_speed = constrain(right_motor_speed, -255, 255);
+	// run(left_motor_speed, right_motor_speed);
 
-	// analogWrite(9, initial_motor_speed - PID_value);  //Left Motor Speed
-	// analogWrite(10, initial_motor_speed + PID_value); //Right Motor Speed
-	// run(initial_motor_speed - PID_value, initial_motor_speed + PID_value);
-	run(left_motor_speed, right_motor_speed);
-
-	//following lines of code are to make the bot move forward
-	/*The pin numbers and high, low values might be different
-    depending on your connections */
-	// digitalWrite(4, HIGH);
-	// digitalWrite(5, LOW);
-	// digitalWrite(6, LOW);
-	// digitalWrite(7, HIGH);
+	if((error>=-2)&&(error<=2)){
+		run(left_motor_speed, right_motor_speed);
+	}else if(error<-2){
+		error = 0;
+		sright(100);
+	}else
+	{
+		error = 0;
+		sleft(100);
+	}
 }
 
 /**
@@ -184,16 +179,6 @@ void run(float Speed1, float Speed2)
 		pwm.setPWM(15, 0, 0); //左后
 		pwm.setPWM(14, 0, -Speed1);
 	}
-
-	// pwm.setPWM(10, 0, Speed2); //右前
-	// pwm.setPWM(11, 0, 0);
-	// pwm.setPWM(8, 0, Speed2); //右后
-	// pwm.setPWM(9, 0, 0);
-
-	// pwm.setPWM(13, 0, Speed1); //左前
-	// pwm.setPWM(12, 0, 0);
-	// pwm.setPWM(15, 0, Speed1); //左后
-	// pwm.setPWM(14, 0, 0);
 }
 void sleft(float Speed){
 	pwm.setPWM(10, 0, Speed); //右前
