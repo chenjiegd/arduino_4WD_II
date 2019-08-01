@@ -1,6 +1,7 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
+float max = 3;
 float Kp = 38, Ki = 4, Kd = 50;//
 float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
 float previous_error = 0, previous_I = 0;
@@ -96,10 +97,10 @@ void read_sensor_values()
 	{
 		if(error>0){
 			//左旋
-			error = 3;
+			error = max;
 		}else{
 			//右旋
-			error = -3;
+			error = -max;
 		}
 	}
 }
