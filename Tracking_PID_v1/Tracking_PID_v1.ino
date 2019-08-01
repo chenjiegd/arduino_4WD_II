@@ -1,7 +1,7 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
-float Kp = 80, Ki = 0, Kd = 9000;//
+float Kp = 38, Ki = 4, Kd = 50;//
 float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
 float previous_error = 0, previous_I = 0;
 int sensor[3] = {0, 0, 0};
@@ -17,7 +17,7 @@ void Clear_All_PWM(void);
 
 void setup()
 {
-	Serial.begin(9600);
+	//Serial.begin(9600);
 	// put your setup code here, to run once:
 	//初始化电机驱动IO为输出方式
 	pwm.begin();
@@ -46,7 +46,7 @@ void read_sensor_values()
 	sensor[0] = analogRead(A0);
 	sensor[1] = analogRead(A1);
 	sensor[2] = analogRead(A2);
-	if (sensor[0] > 40)
+	if (sensor[0] > 30)
 	{
 		sensor[0] = 1;
 	}
@@ -54,7 +54,7 @@ void read_sensor_values()
 	{
 		sensor[0] = 0;
 	}
-	if (sensor[1] > 40)
+	if (sensor[1] > 30)
 	{
 		sensor[1] = 1;
 	}
@@ -62,7 +62,7 @@ void read_sensor_values()
 	{
 		sensor[1] = 0;
 	}
-	if (sensor[2] > 40)
+	if (sensor[2] > 35)
 	{
 		sensor[2] = 1;
 	}
@@ -71,6 +71,7 @@ void read_sensor_values()
 		sensor[2] = 0;
 	}
 
+	
 	if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1))
 	{
 		error = 2;
@@ -93,7 +94,13 @@ void read_sensor_values()
 	}
 	else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0))
 	{
-		Clear_All_PWM();
+		if(error>0){
+			//左旋
+			error = 3;
+		}else{
+			//右旋
+			error = -3;
+		}
 	}
 }
 
@@ -186,6 +193,28 @@ void run(float Speed1, float Speed2)
 	// pwm.setPWM(12, 0, 0);
 	// pwm.setPWM(15, 0, Speed1); //左后
 	// pwm.setPWM(14, 0, 0);
+}
+void sleft(float Speed){
+	pwm.setPWM(10, 0, Speed); //右前
+	pwm.setPWM(11, 0, 0);
+	pwm.setPWM(8, 0, Speed); //右后
+	pwm.setPWM(9, 0, 0);
+
+	pwm.setPWM(13, 0, 0); //左前
+	pwm.setPWM(12, 0, Speed);
+	pwm.setPWM(15, 0, 0); //左后
+	pwm.setPWM(14, 0, Speed);
+}
+void sright(float Speed){
+	pwm.setPWM(10, 0, 0); //右前
+	pwm.setPWM(11, 0, Speed);
+	pwm.setPWM(8, 0, 0); //右后
+	pwm.setPWM(9, 0, Speed);
+
+	pwm.setPWM(13, 0, Speed); //左前
+	pwm.setPWM(12, 0, 0);
+	pwm.setPWM(15, 0, Speed); //左后
+	pwm.setPWM(14, 0, 0);
 }
 
 /**
