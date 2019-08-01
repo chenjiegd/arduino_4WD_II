@@ -181,9 +181,9 @@ void run(float Speed1, float Speed2)
 	else
 	{
 		pwm.setPWM(10, 0, 0); //右前
-		pwm.setPWM(11, 0, -Speed2);
+		pwm.setPWM(11, 0, abs(Speed2));
 		pwm.setPWM(8, 0, 0); //右后
-		pwm.setPWM(9, 0, -Speed2);
+		pwm.setPWM(9, 0, abs(Speed2));
 	}
 	if (Speed1 > 0)
 	{
@@ -195,9 +195,9 @@ void run(float Speed1, float Speed2)
 	else
 	{
 		pwm.setPWM(13, 0, 0); //左前
-		pwm.setPWM(12, 0, -Speed1);
+		pwm.setPWM(12, 0, abs(Speed1));
 		pwm.setPWM(15, 0, 0); //左后
-		pwm.setPWM(14, 0, -Speed1);
+		pwm.setPWM(14, 0, abs(Speed1));
 	}
 }
 
